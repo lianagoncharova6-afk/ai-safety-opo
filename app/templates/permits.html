@@ -1,0 +1,85 @@
+```html
+{% extends "base.html" %}
+{% block title %}Наряды-допуски{% endblock %}
+{% block content %}
+<h1 class="mb-3">Наряды-допуски</h1>
+<table class="table table-striped" id="permits-table">
+<thead class="table-dark">
+<tr>
+    <th>ID</th><th>Номер</th><th>Тип</th><th>Статус</th>
+    <th>Объект ОКПО</th><th>Начало</th><th>Окончание</th><th>Действия</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+const PERMIT_TYPE_LABELS = {
+    gas_hazard: 'Газоопасные',
+    fire: 'Огневые',
+    repair: 'Ремонтные',
+    combined: 'Комбинированные'
+};
+
+const STATUS_BADGE = {
+    active: 'success',
+    draft: 'secondary',
+    suspended: 'warning',
+    closed: 'dark'
+};
+
+async function loadPermits() {
+    const resp = await fetch('/api/permits/');
+    const data = await resp.json();
+    const tbody = document.querySelector('#permits-table tbody');
+    tbody.innerHTML = '';
+
+    data.forEach(p => {
+        const tr = document.createElement('tr');
+        const permitType = PERMIT_TYPE_LABELS[p.permit_type] || 'Комбинированные';
+        const badgeClass = STATUS_BADGE[p.status] || 'dark';
+        const startDate = new Date(p.work_start_date).toLocaleDateString('ru');
+        const endDate = new Date(p.work_end_date).toLocaleDateString('ru');
+
+        let actions = '';
+        if (p.status === 'draft') {
+            actions = '<button class="btn btn-sm btn-success" onclick="activatePermit(' + p.id + ')">Активировать</button>';
+        } else if (p.status === 'active') {
+            actions = '<button class="btn btn-sm btn-info me-1" onclick="aiScan(' + p.id + ')">AI-сканирование</button>' +
+                      '<button class="btn btn-sm btn-dark" onclick="closePermit(' + p.id + ')">Закрыть</button>';
+        }
+
+        tr.innerHTML = '<td>' + p.id + '</td>' +
+            '<td><strong>' + p.permit_number + '</strong></td>' +
+            '<td>' + permitType + '</td>' +
+            '<td><span class="badge bg-' + badgeClass + '">' + p.status + '</span></td>' +
+            '<td>ID:' + p.object_okpo_id + '</td>' +
+            '<td>' + startDate + '</td>' +
+            '<td>' + endDate + '</td>' +
+            '<td>' + actions + '</td>';
+        tbody.appendChild(tr);
+    });
+}
+
+async function activatePermit(id) {
+    await fetch('/api/permits/' + id + '/activate', {method:'POST'});
+    loadPermits();
+}
+
+async function closePermit(id) {
+    if (!confirm('Закрыть наряд? Будет сформирована матрица рисков.')) return;
+    await fetch('/api/permits/' + id + '/close', {method:'POST'});
+    loadPermits();
+}
+
+async function aiScan(id) {
+    const resp = await fetch('/api/violations/ai-scan/' + id, {method:'POST'});
+    const result = await resp.json();
+    alert(result.message);
+    loadPermits();
+}
+
+loadPermits();
+</script>
+{% endblock %}
+```

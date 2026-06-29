@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+        <div class="card">
+            <div class="card-header">Распределение рисков</div>
+            <div class="card-body">
+                <canvas id="chart-risk-dist" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDashboard() {
+    const resp = await fetch('/api/dashboard/stats');
+    const data = await resp.json();
+    document.getElementById('stat-total-permits').textContent = data.total_permits;
+    document.getElementById('stat-active-permits').textContent = data.active_permits;
+    document.getElementById('stat-total-violations').textContent = data.total_violations;
+
+    const vTypes = data.violations_by_type || {};
+    new Chart(document.getElementById('chart-violations-type'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(vTypes).map(k => {
+                const labels = {
+                    no_helmet:'Без каски', no_vest:'Без жилета',
+                    no_mask:'Без маски', danger_zone_entry:'Опасная зона',
+                    smoke_detected:'Задымление', spill_detected:'Разлив',
+                    equipment_failure:'Отказ оборудования'
+                };
+                return labels[k] || k;
+            }),
+            datasets: [{
+                label: 'Количество',
+                data: Object.values(vTypes),
+                backgroundColor: '#dc3545',
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    const rDist = data.risk_distribution || {};
+    new Chart(document.getElementById('chart-risk-dist'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(rDist).map(k => {
+                const labels = {low:'Низкий', medium:'Средний', high:'Высокий', critical:'Критический'};
+                return labels[k] || k;
+            }),
+            datasets: [{
+                data: Object.values(rDist),
+                backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545'],
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+loadDashboard();
+</script>
+{% endblock %}
+

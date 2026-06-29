@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Справочники{% endblock %}
+{% block content %}
+<h1>Справочники системы</h1>
+<p class="text-muted">Управление справочными данными — через API (см. <a href="/docs">/docs</a>)</p>
+
+<ul class="list-group">
+    <li class="list-group-item"><strong>GET /api/references/employees</strong> — Сотрудники</li>
+    <li class="list-group-item"><strong>GET /api/references/objects</strong> — Объекты ОКПО</li>
+    <li class="list-group-item"><strong>GET /api/references/ppe</strong> — СИЗ</li>
+    <li class="list-group-item"><strong>GET /api/references/equipment</strong> — Оборудование</li>
+    <li class="list-group-item"><strong>GET /api/references/safety-signs</strong> — Знаки безопасности</li>
+    <li class="list-group-item"><strong>GET /api/references/activity-types</strong> — Виды деятельности</li>
+    <li class="list-group-item"><strong>GET /api/references/checklist-items</strong> — Чек-листы</li>
+</ul>
+{% endblock %}
