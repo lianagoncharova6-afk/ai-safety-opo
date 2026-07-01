@@ -1,13 +1,24 @@
 """
 SQLAlchemy модели — 17 таблиц.
 """
+
 from datetime import datetime
 from sqlalchemy import (
-    Column, Integer, String, Float, Boolean, Text,
-    DateTime, Date, ForeignKey, CheckConstraint, Index,
+    Column,
+    Integer,
+    String,
+    Float,
+    Boolean,
+    Text,
+    DateTime,
+    Date,
+    ForeignKey,
+    CheckConstraint,
+    Index,
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
+
 
 class Organization(Base):
     __tablename__ = "organization"
@@ -19,6 +30,7 @@ class Organization(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     objects = relationship("ObjectOkpo", back_populates="organization", cascade="all, delete")
+
 
 class ObjectOkpo(Base):
     __tablename__ = "object_okpo"
@@ -39,6 +51,7 @@ class ObjectOkpo(Base):
         CheckConstraint("danger_class IN ('I', 'II', 'III', 'IV')", name="ck_obj_danger_class"),
     )
 
+
 class Employee(Base):
     __tablename__ = "employee"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -50,6 +63,7 @@ class Employee(Base):
     brief_type = Column(String(100))
     is_active = Column(Boolean, default=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
 
 class Ppe(Base):
     __tablename__ = "ppe"
@@ -63,6 +77,7 @@ class Ppe(Base):
     image_url = Column(String(500))
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
 class Equipment(Base):
     __tablename__ = "equipment"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -73,6 +88,7 @@ class Equipment(Base):
     last_check_date = Column(Date)
     is_critical = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
 
 class SafetySign(Base):
     __tablename__ = "safety_sign"
@@ -85,6 +101,7 @@ class SafetySign(Base):
     required_for = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
 class ActivityType(Base):
     __tablename__ = "activity_type"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -96,6 +113,7 @@ class ActivityType(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     permits = relationship("WorkPermit", back_populates="activity_type")
+
 
 class WorkPermit(Base):
     __tablename__ = "work_permit"
@@ -138,6 +156,7 @@ class WorkPermit(Base):
         Index("idx_work_permit_dates", "work_start_date", "work_end_date"),
     )
 
+
 class PermitCrew(Base):
     __tablename__ = "permit_crew"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -150,6 +169,7 @@ class PermitCrew(Base):
     permit = relationship("WorkPermit", back_populates="crew")
     employee = relationship("Employee")
 
+
 class PermitPpe(Base):
     __tablename__ = "permit_ppe"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -161,6 +181,7 @@ class PermitPpe(Base):
     permit = relationship("WorkPermit", back_populates="ppe_list")
     ppe = relationship("Ppe")
 
+
 class PermitEquipment(Base):
     __tablename__ = "permit_equipment"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -171,6 +192,7 @@ class PermitEquipment(Base):
 
     permit = relationship("WorkPermit", back_populates="equipment_list")
     equipment = relationship("Equipment")
+
 
 class Violation(Base):
     __tablename__ = "violation"
@@ -201,6 +223,7 @@ class Violation(Base):
         Index("idx_violation_permit", "permit_id", "detected_at"),
     )
 
+
 class GasMonitor(Base):
     __tablename__ = "gas_monitor"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -216,9 +239,8 @@ class GasMonitor(Base):
 
     permit = relationship("WorkPermit", back_populates="gas_monitors")
 
-    __table_args__ = (
-        Index("idx_gas_monitor_permit", "permit_id", "monitor_time"),
-    )
+    __table_args__ = (Index("idx_gas_monitor_permit", "permit_id", "monitor_time"),)
+
 
 class RiskMatrix(Base):
     __tablename__ = "risk_matrix"
@@ -244,6 +266,7 @@ class RiskMatrix(Base):
         ),
     )
 
+
 class ChecklistItem(Base):
     __tablename__ = "checklist_item"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -253,6 +276,7 @@ class ChecklistItem(Base):
     normative_ref = Column(String(300))
     is_required = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
 
 class PermitChecklist(Base):
     __tablename__ = "permit_checklist"
@@ -266,6 +290,7 @@ class PermitChecklist(Base):
 
     permit = relationship("WorkPermit", back_populates="checklists")
     checklist_item = relationship("ChecklistItem")
+
 
 class ExportLog(Base):
     __tablename__ = "export_log"

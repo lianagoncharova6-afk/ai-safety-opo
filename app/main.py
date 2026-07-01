@@ -1,6 +1,7 @@
 """
 Главный модуль FastAPI: роутеры, шаблоны, статика.
 """
+
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -27,21 +28,26 @@ app.include_router(violations.router, prefix="/api/violations", tags=["Violation
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(export.router, prefix="/api/export", tags=["Export"])
 
+
 @app.get("/")
 def page_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
 
 @app.get("/permits")
 def page_permits(request: Request):
     return templates.TemplateResponse("permits.html", {"request": request})
 
+
 @app.get("/references")
 def page_references(request: Request):
     return templates.TemplateResponse("references.html", {"request": request})
 
+
 @app.get("/violations")
 def page_violations(request: Request):
     return templates.TemplateResponse("violations.html", {"request": request})
+
 
 @app.get("/health")
 def health_check():

@@ -1,6 +1,7 @@
 """
 CRUD-операции для всех сущностей.
 """
+
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -150,6 +151,7 @@ def close_work_permit(db: Session, permit_id: int) -> Optional[models.WorkPermit
     obj.closed_at = datetime.utcnow()
     db.commit()
     from app.services.risk_matrix import generate_risk_matrix_for_permit
+
     generate_risk_matrix_for_permit(db, permit_id)
     db.refresh(obj)
     return obj

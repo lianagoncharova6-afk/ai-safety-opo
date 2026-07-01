@@ -1,8 +1,10 @@
 """
 Расчёт матрицы рисков (5×5) согласно методологии Risk Assessment Matrix.
 """
+
 from sqlalchemy.orm import Session
 from app.models import RiskMatrix, Violation
+
 
 def classify_risk(risk_score: int) -> str:
     if risk_score <= 4:
@@ -14,6 +16,7 @@ def classify_risk(risk_score: int) -> str:
     else:
         return "critical"
 
+
 MITIGATION_TEMPLATES = {
     "no_helmet": "Обязать использование защитных касок. Провести внеплановый инструктаж.",
     "no_vest": "Проверить наличие сигнальных жилетов у всех членов бригады.",
@@ -24,6 +27,7 @@ MITIGATION_TEMPLATES = {
     "spill_detected": "Локализовать разлив. Вызвать аварийную бригаду.",
     "equipment_failure": "Остановить использование оборудования. Провести дефектовку.",
 }
+
 
 def generate_risk_matrix_for_permit(db: Session, permit_id: int):
     violations = db.query(Violation).filter(Violation.permit_id == permit_id).all()
@@ -44,6 +48,7 @@ def generate_risk_matrix_for_permit(db: Session, permit_id: int):
         risk_score = min(severity * probability, 25)
         risk_category = classify_risk(risk_score)
         from app.services.ai_vision import VIOLATION_LABELS
+
         label = VIOLATION_LABELS.get(v_type, v_type)
         mitigation = MITIGATION_TEMPLATES.get(v_type, "Разработать меры по снижению риска.")
         entry = RiskMatrix(

@@ -2,14 +2,21 @@
 Модуль AI-видеоаналитики: симуляция обнаружения нарушений
 с помощью камер компьютерного зрения.
 """
+
 import random
 from typing import List, Dict
 from sqlalchemy.orm import Session
 from app import crud, schemas
 
 VIOLATION_TYPES_POOL = [
-    "no_helmet", "no_vest", "no_mask", "danger_zone_entry",
-    "smoke_detected", "fire_detected", "spill_detected", "equipment_failure"
+    "no_helmet",
+    "no_vest",
+    "no_mask",
+    "danger_zone_entry",
+    "smoke_detected",
+    "fire_detected",
+    "spill_detected",
+    "equipment_failure",
 ]
 
 VIOLATION_LABELS = {
@@ -22,6 +29,7 @@ VIOLATION_LABELS = {
     "spill_detected": "Разлив нефтепродуктов",
     "equipment_failure": "Отказ оборудования",
 }
+
 
 def simulate_ai_scan(db: Session, permit_id: int) -> List[Dict]:
     violations_found = []
@@ -45,16 +53,19 @@ def simulate_ai_scan(db: Session, permit_id: int) -> List[Dict]:
             image_snapshot_url=f"/snapshots/{permit_id}/{v_type}_{random.randint(1000,9999)}.jpg",
         )
         violation = crud.create_violation(db, data)
-        violations_found.append({
-            "id": violation.id,
-            "type": v_type,
-            "label": VIOLATION_LABELS.get(v_type, v_type),
-            "severity": severity,
-            "probability": probability,
-            "risk_level": violation.risk_level,
-            "camera_id": violation.camera_id,
-        })
+        violations_found.append(
+            {
+                "id": violation.id,
+                "type": v_type,
+                "label": VIOLATION_LABELS.get(v_type, v_type),
+                "severity": severity,
+                "probability": probability,
+                "risk_level": violation.risk_level,
+                "camera_id": violation.camera_id,
+            }
+        )
     return violations_found
+
 
 def simulate_continuous_monitoring(db: Session, permit_id: int, cycles: int = 10):
     all_violations = []
@@ -62,4 +73,3 @@ def simulate_continuous_monitoring(db: Session, permit_id: int, cycles: int = 10
         result = simulate_ai_scan(db, permit_id)
         all_violations.extend(result)
     return all_violations
-

@@ -10,6 +10,7 @@ TEST_DATABASE_URL = "sqlite:///./test_ai_safety.db"
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
@@ -17,7 +18,9 @@ def override_get_db():
     finally:
         db.close()
 
+
 app.dependency_overrides[get_db] = override_get_db
+
 
 @pytest.fixture(autouse=True)
 def setup_db():
@@ -25,10 +28,12 @@ def setup_db():
     yield
     Base.metadata.drop_all(bind=engine)
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 def db_session():
@@ -37,4 +42,3 @@ def db_session():
         yield db
     finally:
         db.close()
-
